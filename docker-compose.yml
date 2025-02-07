@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: test1234
+      POSTGRES_PASSWORD: ps1234
+      POSTGRES_DB: rnpr
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U test1234 -d rnpr" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rnp
+    
+  app:
+    build:
+      context: .
+    container_name: nextjs_app
+    working_dir: /app
+    ports:
+      - '3000:3000'
+      - '5555:5555'
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh","-c","npx prisma migrate deploy && npx prisma generate && npm run dev"]
+    networks:
+      - rnp
+
+volumes:
+  postgres_data:
+
+networks:
+  rnp:
+    driver: bridge
