@@ -33,7 +33,7 @@ npx prisma db seed
 ## Note
 To run this project you must register accounts in these services and get secret keys.
 
-Clerk
-Cloudinary
+ - Clerk
+ - Cloudinary
 
 
